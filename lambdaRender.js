@@ -67,7 +67,7 @@ var visit = function (node, formatterProviderInstance, level) {
     nodeContent = node;
   }
   else if(node.type === "expr") {
-    nodeContent = "λ";
+    nodeContent = "&lambda;";
     nodeContent += node.vars.map(function (v) {
       return visit(v, formatterProviderInstance, level);
     }).join(',');
