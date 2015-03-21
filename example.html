@@ -1,0 +1,19 @@
+<html>
+<head>
+  <script src="lambdaParser.js"></script>
+  <script src="lambdaRender.js"></script>
+  
+  </head>
+  <body>
+    <input id="lambdaTerm" type="text" value="\x.((x x) ((x (x x)) (\x.(x x))))"/>
+    <button onClick="lambdaEvaluate()">Render</button>
+    <div id="output"></div>
+  </body>
+  <script>
+    function lambdaEvaluate () {
+      var renderInput = document.getElementById("lambdaTerm").value;
+      var renderOutput = lambdaRender(renderInput);
+      document.getElementById("output").innerHTML = renderOutput;
+    }
+  </script>
+</html>
