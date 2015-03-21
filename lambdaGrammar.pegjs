@@ -2,7 +2,7 @@ start
 = term
 
 term 
-= openBracket simpleTerm:simpleTerm closeBracket { return simpleTerm }
+= openBracket innerTerm:term closeBracket { return innerTerm }
 / simpleTerm
 
 simpleTerm
