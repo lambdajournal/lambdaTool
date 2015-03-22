@@ -51,8 +51,8 @@ module.exports = function (grunt) {
     },
     peg: {
       example: {
-        src: "lambdaGrammar.pegjs",
-        dest: "lambdaParser.js",
+        src: "src/lambdaGrammar.pegjs",
+        dest: "src/lambdaParser.js",
         options: {
           exportVar: "lambdaParser"
         }

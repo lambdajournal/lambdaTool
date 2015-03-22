@@ -65,24 +65,26 @@ var visit = function (node, formatterProviderInstance, level) {
   var currentFormat = formatterProviderInstance.next(level).value;
   var nodeContent;
   
-  if(typeof(node) === "string") {
-    nodeContent = node;
-  }
-  else if(node.type === "expr") {
-    nodeContent = "&lambda;";
-    nodeContent += node.vars.map(function (v) {
-      return visit(v, formatterProviderInstance, level);
-    }).join(',');
-    nodeContent += ".";
-    nodeContent += visit(node.body, formatterProviderInstance, level);
-  }
-  else if(node.type === "app") {
-    var firstContent = visit(node.first, formatterProviderInstance, level + 1);
-    firstContent = typeof(node.first) === "Object" ? ("(" + firstContent + ")") : firstContent;
-    var secondContent = visit(node.second, formatterProviderInstance, level + 1);
-    secondContent = typeof(node.second) === "Object" ? ("(" + secondContent + ")") : secondContent;
-    var subContent = "<sub style=\"font-size: 50%;\">" + level + "</sub>";
-    nodeContent = currentFormat.brackets.open + subContent + firstContent + " " + secondContent + subContent + currentFormat.brackets.close;
+  switch(node.type) {
+      case "var" :
+          nodeContent = node.name;
+          break;
+      case "expr":
+          nodeContent = "&lambda;";
+          nodeContent += node.vars.map(function (v) {
+            return visit(v, formatterProviderInstance, level);
+          }).join(',');
+          nodeContent += ".";
+          nodeContent += visit(node.body, formatterProviderInstance, level);
+          break;
+      case "app":
+          var firstContent = visit(node.first, formatterProviderInstance, level + 1);
+          firstContent = typeof(node.first) === "Object" ? ("(" + firstContent + ")") : firstContent;
+          var secondContent = visit(node.second, formatterProviderInstance, level + 1);
+          secondContent = typeof(node.second) === "Object" ? ("(" + secondContent + ")") : secondContent;
+          var subContent = "<sub style=\"font-size: 50%;\">" + level + "</sub>";
+          nodeContent = currentFormat.brackets.open + subContent + firstContent + " " + secondContent + subContent + currentFormat.brackets.close;
+          break;
   }
 
   return "<span style=\"font-size: " + currentFormat.fontSize + "; color: "+  currentFormat.color+ "; \">" + nodeContent + "</span>";

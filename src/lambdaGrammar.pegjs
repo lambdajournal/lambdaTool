@@ -11,7 +11,7 @@ simpleTerm
 / application
 
 variable
-= chars:[A-Za-z0-9]+ { return chars.join(""); }
+= chars:[A-Za-z0-9]+ { return { type: "var", name: chars.join("")}; }
 
 expression
 = "\\" vars:varList "." body:term { return { type: "expr", vars: vars, body: body}; }

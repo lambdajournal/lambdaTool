@@ -1,0 +1,11 @@
+    var visitFunctions = {
+        visitVariable : (variableName) => {
+
+        },
+        visitExpression : (variableNames, body) => {
+
+        },
+        visitApplication : (firstTerm, secondTerm) => {
+
+        }
+    };
