@@ -1,3 +1,4 @@
+/* jslint esnext: true */
 var colorProvider = function*() {
   while (true) {
     yield "black";
@@ -10,16 +11,17 @@ var colorProvider = function*() {
     yield "red";
     yield "orange";
   }
-}
+};
 
 var fontSizeProvider = function*(initialSize, deltaSize) {
   var currentSize = initialSize;
   while (true) {
     yield currentSize;
-    if (currentSize - deltaSize >= 8)
+    if (currentSize - deltaSize >= 8) {
       currentSize -= deltaSize;
+    }
   }
-}
+};
 
 var bracketsProvider = function*() {
   while (true) {
@@ -27,7 +29,7 @@ var bracketsProvider = function*() {
     yield { open: "[", close: "]"};
     yield { open: "(", close: ")"};    
   }
-}
+};
 
 var formatterProvider = function*(initialSize, deltaSize) {
   var colorProviderInstance = colorProvider();
@@ -48,7 +50,7 @@ var formatterProvider = function*(initialSize, deltaSize) {
       brackets: bracketsProviderInstance.next().value
     });
   }
-}
+};
 
 var lambdaRender = function (lambdaTerm, initialSize, deltaSize) {
   initialSize = initialSize || 50;
