@@ -24,10 +24,12 @@
     function callByName() {
         var input = lambdaParser.parse(document.getElementById("lambdaTerm2").value);
         var steps = applyCallByName(input);
-        document.getElementById("outputCallByName").innerHTML = "";
+        var stepsHTML = "<ul>";
         for (var step of steps) {
-            document.getElementById("outputCallByName").innerHTML += "<div>" + lambdaRender(step) + "</div>";
+            stepsHTML += "<li>" + lambdaRender(step) + "</li>";
         }
+        stepsHTML += "</ul>";
+        document.getElementById("outputCallByName").innerHTML = stepsHTML;
     }
 </script>
 </html>
