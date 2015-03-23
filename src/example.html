@@ -6,14 +6,28 @@
     <script src="../build/lambdaSolver.js"></script>
 </head>
 <body>
-<input id="lambdaTerm" type="text" value="\x.((x x) ((x (x x)) (\x.(x x))))"/>
-<button onClick="lambdaEvaluate()">Render</button>
-<div id="output"></div>
+<input id="lambdaTerm" size="100" type="text" value="\x.((x x) ((x (x x)) (\x.(x x))))"/>
+<button onClick="render()">Render</button>
+<div id="outputRender"></div>
+
+<input id="lambdaTerm2" size="100" type="text" value="(((\x,y.\x1,x2.((x x1) ((y x1) x2))) (\x1,x2.(x1 (x1 (x1 x2))))) (\x1,x2.(x1 x2)))" />
+<button onClick="callByName()">Call by name</button>
+<div id="outputCallByName"></div>
+
 </body>
 <script>
-    function lambdaEvaluate () {
-        var renderInput = document.getElementById("lambdaTerm").value;
-        document.getElementById("output").innerHTML = lambdaRender(renderInput);
+    function render() {
+        var input = lambdaParser.parse(document.getElementById("lambdaTerm").value);
+        document.getElementById("outputRender").innerHTML = lambdaRender(input);
+    }
+
+    function callByName() {
+        var input = lambdaParser.parse(document.getElementById("lambdaTerm2").value);
+        var steps = applyCallByName(input);
+        document.getElementById("outputCallByName").innerHTML = "";
+        for (var step of steps) {
+            document.getElementById("outputCallByName").innerHTML += "<div>" + lambdaRender(step) + "</div>";
+        }
     }
 </script>
 </html>

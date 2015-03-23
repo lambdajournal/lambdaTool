@@ -55,9 +55,8 @@ var formatterProvider = function*(initialSize, deltaSize) {
 var lambdaRender = function (lambdaTerm, initialSize, deltaSize) {
   initialSize = initialSize || 50;
   deltaSize = deltaSize || 5;
-  var node = lambdaParser.parse(lambdaTerm);
   var formatterProviderInstance = formatterProvider(initialSize, deltaSize);
-  return visit(node, formatterProviderInstance, 0);
+  return visit(lambdaTerm, formatterProviderInstance, 0);
 };
 
 var visit = function (node, formatterProviderInstance, level) {
