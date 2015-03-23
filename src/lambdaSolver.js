@@ -3,23 +3,25 @@
  * Created by Antonio on 22/03/2015.
  */
 
-var lambdaSolve = function (lambdaTerm) {
-
+var applyCallByName = (lambdaTerm) => {
+    var steps = [];
+    var stepClone = lambdaTerm;
+    var makingProgress;
+    do {
+        steps.push(stepClone);
+        stepClone = deepCopyLambdaTerm(stepClone);
+        makingProgress = applyCallByNameStep(stepClone);
+    } while (makingProgress);
+    return steps;
 };
 
-var applyCallByNameStep = function (lambaTerm) {
-    nextCallByNameStep();
-}
-
-
-// Outer Most, Left Most
-var applyCallByNameStep = function (lambdaTerm) {
+// Applies outermost-leftmost resolution
+var applyCallByNameStep = (lambdaTerm) => {
     switch (lambdaTerm.type) {
     case "var":
-        break;
+        return false;
     case "expr":
-        applyCallByNameStep(lambdaTerm.body);
-        break;
+        return applyCallByNameStep(lambdaTerm.body);
     case "app":
         if (lambdaTerm.first.type === "expr") {
             var solvedLambdaTerm = applySafeBetaReduction(lambdaTerm);
@@ -33,14 +35,16 @@ var applyCallByNameStep = function (lambdaTerm) {
                     lambdaTerm[solvedLambdaTermProperty] = solvedLambdaTerm[solvedLambdaTermProperty];
                 }            
             }
-            break;
+            return true;
         }
-        applyCallByNameStep(lambdaTerm.first);
-        break;
+        if (!applyCallByNameStep(lambdaTerm.first)) {
+            return applyCallByNameStep(lambdaTerm.second);
+        }
+        return true;
     }
 };
 
-var visitLambdaTerm = function (lambdaTerm, visitFunctions) {
+var visitLambdaTerm = (lambdaTerm, visitFunctions) => {
     switch (lambdaTerm.type) {
     case "var":
         // we are visiting a variable
@@ -67,7 +71,7 @@ var visitLambdaTerm = function (lambdaTerm, visitFunctions) {
 
 var deepCopyLambdaTerm = (lambdaTerm) => JSON.parse(JSON.stringify(lambdaTerm));
 
-var lambdaTermToString = function (lambaTerm) {
+var lambdaTermToString = (lambaTerm) => {
     var visit = function (node) {
         var nodeContent;
         switch (node.type) {
@@ -93,7 +97,7 @@ var lambdaTermToString = function (lambaTerm) {
     return visit(lambaTerm);
 };
 
-var applyAlphaEquivalence = function (lambdaTerm, replacingRules) {
+var applyAlphaEquivalence = (lambdaTerm, replacingRules) => {
     var result = deepCopyLambdaTerm(lambdaTerm);
 
     var visitFunctions = {
@@ -111,7 +115,7 @@ var applyAlphaEquivalence = function (lambdaTerm, replacingRules) {
     return result;
 };
 
-var captureAvoidingSubstitution = function (lambdaTerm, replacingRules) {
+var captureAvoidingSubstitution = (lambdaTerm, replacingRules) => {
     var result = deepCopyLambdaTerm(lambdaTerm);
 
     if (lambdaTerm.type === "var") {
@@ -156,35 +160,31 @@ var captureAvoidingSubstitution = function (lambdaTerm, replacingRules) {
     return result;
 };
 
-var applyBetaReduction = function (lambdaApplication) {
+var applyBetaReduction = (lambdaApplication) => {
     if (lambdaApplication.type != "app")
         throw new Error("trying to apply a beta reduction to a term which is not an application");
     if (lambdaApplication.first.type != "expr")
         throw new Error("trying to apply a beta reduction to an application whose first is not an expression");
     var exprVars = lambdaApplication.first.vars;
     var exprBody = lambdaApplication.first.body;
+    var replacingRules = {};
+    replacingRules[exprVars[0].name] = lambdaApplication.second;
+
     if (exprVars.length == 1) {
         // (\x.t)s => t[x:=s]
-        var replacingRules = {};
-        replacingRules[exprVars[0].name] = lambdaApplication.second;
         return captureAvoidingSubstitution(exprBody, replacingRules);
     } else {
         // currying
         // (\x1,x2...,xn.t s) => \x2,x3,...xn.(t[x1:=s])
-        var replacingRules = {};
-        replacingRules[exprVars[0].name] = lambdaApplication.second;
-        var captureAvoidingSubResult = captureAvoidingSubstitution(exprBody, replacingRules);
-        var exprVarsResult = deepCopyLambdaTerm(exprVars).slice(1);
-        var exprResult = {
+        return {
             type: "expr",
-            vars: exprVarsResult,
-            body: captureAvoidingSubResult
+            vars: deepCopyLambdaTerm(exprVars).slice(1),
+            body: captureAvoidingSubstitution(exprBody, replacingRules)
         };
-        return exprResult;
     }
 };
 
-var applySafeBetaReduction = function (lambdaApplication) {
+var applySafeBetaReduction = (lambdaApplication) => {
     var {
         firstTerm, secondTerm
     } =
@@ -196,7 +196,7 @@ var applySafeBetaReduction = function (lambdaApplication) {
     })
 };
 
-var disambiguateVariablesInLambdaTerms = function (firstTerm, secondTerm) {
+var disambiguateVariablesInLambdaTerms = (firstTerm, secondTerm) => {
     var varsFirstTerm = findBoundAndFreeVariables(firstTerm);
     var varsSecondTerm = findBoundAndFreeVariables(secondTerm);
 
@@ -230,7 +230,7 @@ var disambiguateVariablesInLambdaTerms = function (firstTerm, secondTerm) {
     };
 };
 
-var findBoundAndFreeVariables = function (lambdaTerm) {
+var findBoundAndFreeVariables = (lambdaTerm) => {
     var allVars = [];
     var boundVars = [];
     var freeVars = [];

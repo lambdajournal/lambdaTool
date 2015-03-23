@@ -1,20 +1,19 @@
 <html>
-  <head>
+<head>
     <script src="../node_modules/grunt-babel/node_modules/babel-core/browser-polyfill.js"></script>
     <script src="lambdaParser.js"></script>
     <script src="lambdaRender.js"></script>
     <script src="../build/lambdaSolver.js"></script>
-  </head>
-  <body>
-    <input id="lambdaTerm" type="text" value="\x.((x x) ((x (x x)) (\x.(x x))))"/>
-    <button onClick="lambdaEvaluate()">Render</button>
-    <div id="output"></div>
-  </body>
-  <script>
+</head>
+<body>
+<input id="lambdaTerm" type="text" value="\x.((x x) ((x (x x)) (\x.(x x))))"/>
+<button onClick="lambdaEvaluate()">Render</button>
+<div id="output"></div>
+</body>
+<script>
     function lambdaEvaluate () {
-      var renderInput = document.getElementById("lambdaTerm").value;
-      var renderOutput = lambdaRender(renderInput);
-      document.getElementById("output").innerHTML = renderOutput;
+        var renderInput = document.getElementById("lambdaTerm").value;
+        document.getElementById("output").innerHTML = lambdaRender(renderInput);
     }
-  </script>
+</script>
 </html>
