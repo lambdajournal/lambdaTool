@@ -6,12 +6,16 @@ term
 / simpleTerm
 
 simpleTerm
-= variable
+= wellKnownTerm
+/ variable
 / expression
 / application
 
+wellKnownTerm
+= chars: ("TRUE" / "FALSE" / "SUM" / [0-9]+) { return { type: "wellKnownTerm", name: chars.toString().replace(/,/g,"")}; }
+
 variable
-= chars:[A-Za-z0-9]+ { return { type: "var", name: chars.join("")}; }
+= first:[a-z] others:[a-z0-9]* { return { type: "var", name: first + others.join("")}; }
 
 expression
 = "\\" vars:varList "." body:term { return { type: "expr", vars: vars, body: body}; }
