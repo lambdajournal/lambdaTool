@@ -12,7 +12,7 @@ simpleTerm
 / application
 
 wellKnownTerm
-= chars: ("TRUE" / "FALSE" / "SUM" / [0-9]+) { return { type: "wellKnownTerm", name: chars.toString().replace(/,/g,"")}; }
+= chars: ("TRUE" / "FALSE" / "SUM" / [0-9]+) { return { type: "wellKnownTerm", name: chars.toString().replace(/,/g,""), subType: typeof(chars) === 'string' ? 'string' : 'number'}}
 
 variable
 = first:[a-z] others:[a-z0-9]* { return { type: "var", name: first + others.join("")}; }

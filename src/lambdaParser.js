@@ -43,7 +43,7 @@ lambdaParser = (function() {
         peg$c8 = [],
         peg$c9 = /^[0-9]/,
         peg$c10 = { type: "class", value: "[0-9]", description: "[0-9]" },
-        peg$c11 = function(chars) { return { type: "wellKnownTerm", name: chars.toString().replace(/,/g,"")}; },
+        peg$c11 = function(chars) { return { type: "wellKnownTerm", name: chars.toString().replace(/,/g,""), subType: typeof(chars) === 'string' ? 'string' : 'number'}},
         peg$c12 = /^[a-z]/,
         peg$c13 = { type: "class", value: "[a-z]", description: "[a-z]" },
         peg$c14 = /^[a-z0-9]/,

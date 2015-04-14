@@ -1,6 +1,6 @@
 /*jslint esnext:true */
 /**
- * Created by Antonio on 22/03/2015.
+ * Created by Antonio, Andrea on 22/03/2015.
  */
 
 var applyCallByName = (lambdaTerm) => {
@@ -31,9 +31,9 @@ var applyCallByNameStep = (lambdaTerm) => {
                 }
             }
             for (var solvedLambdaTermProperty in solvedLambdaTerm) {
-                if(solvedLambdaTerm.hasOwnProperty(solvedLambdaTermProperty)) {
+                if (solvedLambdaTerm.hasOwnProperty(solvedLambdaTermProperty)) {
                     lambdaTerm[solvedLambdaTermProperty] = solvedLambdaTerm[solvedLambdaTermProperty];
-                }            
+                }
             }
             return true;
         }
@@ -193,7 +193,7 @@ var applySafeBetaReduction = (lambdaApplication) => {
         type: "app",
         first: firstTerm,
         second: secondTerm
-    })
+    });
 };
 
 var disambiguateVariablesInLambdaTerms = (firstTerm, secondTerm) => {
@@ -256,4 +256,151 @@ var findBoundAndFreeVariables = (lambdaTerm) => {
         boundVars: boundVars,
         allVars: allVars
     };
+};
+
+var freshVariableNamesProvider = function* (lambdaTerm) {
+    var allVars = findBoundAndFreeVariables(lambdaTerm).allVars;
+    var index = 1;
+    const freshVariablePrefix = "x";
+    while (true) {
+        var freshVariable = freshVariablePrefix + (index++);
+        if (allVars.indexOf(freshVariable) < 0) {
+            yield freshVariable;
+        }
+    }
+};
+
+var replaceWellKnownTerms = (lambdaTerm, freshVariableNamesProvider) => {
+    switch (lambdaTerm.type) {
+    case "wellKnownTerm":
+        return resolveWellKnownTerms(lambdaTerm, freshVariableNamesProvider);
+    case "var":
+        return lambdaTerm;
+    case "expr":
+        if (lambdaTerm.body.type === 'wellKnownTerm') {
+            lambdaTerm.body = resolveWellKnownTerms(lambdaTerm.body, freshVariableNamesProvider);
+        } else {
+            // if lambda.body !== wellKnowTerm
+            replaceWellKnownTerms(lambdaTerm.body, freshVariableNamesProvider);
+        }
+        return lambdaTerm;
+    case "app":
+        if (lambdaTerm.first.type === 'wellKnownTerm') {
+            lambdaTerm.first = resolveWellKnownTerms(lambdaTerm.first, freshVariableNamesProvider);
+        } else {
+            replaceWellKnownTerms(lambdaTerm.first, freshVariableNamesProvider);
+        }
+        if (lambdaTerm.second.type === 'wellKnownTerm') {
+            lambdaTerm.second = resolveWellKnownTerms(lambdaTerm.second, freshVariableNamesProvider);
+        } else {
+            replaceWellKnownTerms(lambdaTerm.second, freshVariableNamesProvider);
+        }
+        return lambdaTerm;
+    }
+};
+
+var resolveWellKnownTerms = (wellKnownTerm, freshVariableNamesProvider) => {
+    if (wellKnownTerm.subType === 'string') {
+        switch (wellKnownTerm.name) {
+        case 'SUM':
+            var firstVariableName = freshVariableNamesProvider.next().value;
+            var secondVariableName = freshVariableNamesProvider.next().value;
+            var thirdVariableName = freshVariableNamesProvider.next().value;
+            var forthVariableName = freshVariableNamesProvider.next().value;
+            return {
+                "type": "expr",
+                "vars": [
+                    {
+                        "type": "var",
+                        "name": firstVariableName
+                      },
+                    {
+                        "type": "var",
+                        "name": secondVariableName
+                      }
+                   ],
+                "body": {
+                    "type": "expr",
+                    "vars": [
+                        {
+                            "type": "var",
+                            "name": thirdVariableName
+                         },
+                        {
+                            "type": "var",
+                            "name": forthVariableName
+                         }
+                      ],
+                    "body": {
+                        "type": "app",
+                        "first": {
+                            "type": "app",
+                            "first": {
+                                "type": "var",
+                                "name": firstVariableName
+                            },
+                            "second": {
+                                "type": "var",
+                                "name": thirdVariableName
+                            }
+                        },
+                        "second": {
+                            "type": "app",
+                            "first": {
+                                "type": "app",
+                                "first": {
+                                    "type": "var",
+                                    "name": secondVariableName
+                                },
+                                "second": {
+                                    "type": "var",
+                                    "name": thirdVariableName
+                                }
+                            },
+                            "second": {
+                                "type": "var",
+                                "name": forthVariableName
+                            }
+                        }
+                    }
+                }
+            };
+        }
+
+    } else if (wellKnownTerm.subType === 'number') {
+        var number = Number(wellKnownTerm.name);
+        var firstVariableName = freshVariableNamesProvider.next().value;
+        var secondVariableName = freshVariableNamesProvider.next().value;
+        var resultBody = {
+            type: 'var',
+            name: secondVariableName
+        };
+        for (let n = 0; n < number; n++) {
+            resultBody = {
+                type: 'app',
+                first: {
+                    type: 'var',
+                    name: firstVariableName
+                },
+                second: resultBody
+            };
+        }
+        return {
+            type: 'expr',
+            vars: [
+                {
+                    "type": "var",
+                    "name": firstVariableName
+                },
+                {
+                    "type": "var",
+                    "name": secondVariableName
+                }
+            ],
+            body: resultBody
+        };
+    } else {
+        throw new Error('This type of wellKnownTerm is not supported');
+    }
+
 };
