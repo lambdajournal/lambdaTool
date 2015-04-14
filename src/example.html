@@ -23,8 +23,8 @@
 
     function callByName() {
         var input = lambdaParser.parse(document.getElementById("lambdaTerm2").value);
-        var freshVariableProvider = freshVariableNamesProvider(input)
-        input = replaceWellKnownTerms(input, freshVariableProvider)
+        var freshVariableProvider = freshVariableNamesProvider(input);
+        input = replaceWellKnownTerms(input, freshVariableProvider);
         var steps = applyCallByName(input);
         var stepsHTML = "<ul>";
         for (var step of steps) {

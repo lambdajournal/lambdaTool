@@ -302,35 +302,251 @@ var replaceWellKnownTerms = (lambdaTerm, freshVariableNamesProvider) => {
 var resolveWellKnownTerms = (wellKnownTerm, freshVariableNamesProvider) => {
     if (wellKnownTerm.subType === 'string') {
         switch (wellKnownTerm.name) {
-        case 'SUM':
-            var firstVariableName = freshVariableNamesProvider.next().value;
-            var secondVariableName = freshVariableNamesProvider.next().value;
-            var thirdVariableName = freshVariableNamesProvider.next().value;
-            var forthVariableName = freshVariableNamesProvider.next().value;
-            return {
-                "type": "expr",
-                "vars": [
-                    {
-                        "type": "var",
-                        "name": firstVariableName
-                      },
-                    {
-                        "type": "var",
-                        "name": secondVariableName
-                      }
-                   ],
-                "body": {
+            case 'TRUE':
+            {
+                var firstVariableName = freshVariableNamesProvider.next().value;
+                var secondVariableName = freshVariableNamesProvider.next().value;
+                return {
                     "type": "expr",
                     "vars": [
                         {
                             "type": "var",
-                            "name": thirdVariableName
-                         },
+                            "name": firstVariableName
+                        },
                         {
                             "type": "var",
-                            "name": forthVariableName
-                         }
-                      ],
+                            "name": secondVariableName
+                        }
+                    ],
+                    "body": {
+                        "type": "var",
+                        "name": firstVariableName
+                    }
+                };
+            }
+            case 'FALSE':
+            {
+                var firstVariableName = freshVariableNamesProvider.next().value;
+                var secondVariableName = freshVariableNamesProvider.next().value;
+                return {
+                    "type": "expr",
+                    "vars": [
+                        {
+                            "type": "var",
+                            "name": firstVariableName
+                        },
+                        {
+                            "type": "var",
+                            "name": secondVariableName
+                        }
+                    ],
+                    "body": {
+                        "type": "var",
+                        "name": secondVariableName
+                    }
+                };
+            }
+            case 'SUM':
+            {
+                var firstVariableName = freshVariableNamesProvider.next().value;
+                var secondVariableName = freshVariableNamesProvider.next().value;
+                var thirdVariableName = freshVariableNamesProvider.next().value;
+                var forthVariableName = freshVariableNamesProvider.next().value;
+                return {
+                    "type": "expr",
+                    "vars": [
+                        {
+                            "type": "var",
+                            "name": firstVariableName
+                        },
+                        {
+                            "type": "var",
+                            "name": secondVariableName
+                        }
+                    ],
+                    "body": {
+                        "type": "expr",
+                        "vars": [
+                            {
+                                "type": "var",
+                                "name": thirdVariableName
+                            },
+                            {
+                                "type": "var",
+                                "name": forthVariableName
+                            }
+                        ],
+                        "body": {
+                            "type": "app",
+                            "first": {
+                                "type": "app",
+                                "first": {
+                                    "type": "var",
+                                    "name": firstVariableName
+                                },
+                                "second": {
+                                    "type": "var",
+                                    "name": thirdVariableName
+                                }
+                            },
+                            "second": {
+                                "type": "app",
+                                "first": {
+                                    "type": "app",
+                                    "first": {
+                                        "type": "var",
+                                        "name": secondVariableName
+                                    },
+                                    "second": {
+                                        "type": "var",
+                                        "name": thirdVariableName
+                                    }
+                                },
+                                "second": {
+                                    "type": "var",
+                                    "name": forthVariableName
+                                }
+                            }
+                        }
+                    }
+                };
+            }
+            case 'SUCC':
+            {
+                var firstVariableName = freshVariableNamesProvider.next().value;
+                var thirdVariableName = freshVariableNamesProvider.next().value;
+                var forthVariableName = freshVariableNamesProvider.next().value;
+                return {
+                    "type": "expr",
+                    "vars": [
+                        {
+                            "type": "var",
+                            "name": firstVariableName
+                        }
+                    ],
+                    "body": {
+                        "type": "expr",
+                        "vars": [
+                            {
+                                "type": "var",
+                                "name": thirdVariableName
+                            },
+                            {
+                                "type": "var",
+                                "name": forthVariableName
+                            }
+                        ],
+                        "body": {
+                            "type": "app",
+                            "first": {
+                                "type": "var",
+                                "name": thirdVariableName
+                            },
+                            "second": {
+                                "type": "app",
+                                "first": {
+                                    "type": "app",
+                                    "first": {
+                                        "type": "var",
+                                        "name": firstVariableName
+                                    },
+                                    "second": {
+                                        "type": "var",
+                                        "name": thirdVariableName
+                                    }
+                                },
+                                "second": {
+                                    "type": "var",
+                                    "name": forthVariableName
+                                }
+                            }
+                        }
+                    }
+                };
+            }
+            case 'AND':
+            {
+                // \x1,x2.\x3,x4.((x1 (x2 (x3 x4))) x4)
+                var firstVariableName = freshVariableNamesProvider.next().value;
+                var secondVariableName = freshVariableNamesProvider.next().value;
+                var thirdVariableName = freshVariableNamesProvider.next().value;
+                var forthVariableName = freshVariableNamesProvider.next().value;
+                return {
+                    "type": "expr",
+                    "vars": [
+                        {
+                            "type": "var",
+                            "name": firstVariableName
+                        },
+                        {
+                            "type": "var",
+                            "name": secondVariableName
+                        }
+                    ],
+                    "body": {
+                        "type": "expr",
+                        "vars": [
+                            {
+                                "type": "var",
+                                "name": thirdVariableName
+                            },
+                            {
+                                "type": "var",
+                                "name": forthVariableName
+                            }
+                        ],
+                        "body": {
+                            "type": "app",
+                            "first": {
+                                "type": "app",
+                                "first": {
+                                    "type": "var",
+                                    "name": firstVariableName
+                                },
+                                "second": {
+                                    "type": "app",
+                                    "first": {
+                                        "type": "app",
+                                        "first": {
+                                            "type": "var",
+                                            "name": secondVariableName
+                                        },
+                                        "second": {
+                                            "type": "var",
+                                            "name": thirdVariableName
+                                        }
+                                    },
+                                    "second": {
+                                        "type": "var",
+                                        "name": forthVariableName
+                                    }
+                                }
+                            },
+                            "second": {
+                                "type": "var",
+                                "name": forthVariableName
+                            }
+                        }
+                    }
+                };
+            }
+            case 'OR':
+            {
+                // \x,y.((x x) y)
+                var firstVariableName = freshVariableNamesProvider.next().value;
+                var secondVariableName = freshVariableNamesProvider.next().value;
+                return {
+                    "type": "expr",
+                    "vars": [
+                        {
+                            "type": "var",
+                            "name": firstVariableName
+                        },
+                        {
+                            "type": "var",
+                            "name": secondVariableName
+                        }
+                    ],
                     "body": {
                         "type": "app",
                         "first": {
@@ -341,30 +557,149 @@ var resolveWellKnownTerms = (wellKnownTerm, freshVariableNamesProvider) => {
                             },
                             "second": {
                                 "type": "var",
-                                "name": thirdVariableName
+                                "name": firstVariableName
                             }
                         },
                         "second": {
+                            "type": "var",
+                            "name": secondVariableName
+                        }
+                    }
+                };
+            }
+            case 'NOT':
+            {
+                // \x1.\x3,x4.((x1 x4) x3)
+                var firstVariableName = freshVariableNamesProvider.next().value;
+                var thirdVariableName = freshVariableNamesProvider.next().value;
+                var forthVariableName = freshVariableNamesProvider.next().value;
+                return {
+                    "type": "expr",
+                    "vars": [
+                        {
+                            "type": "var",
+                            "name": firstVariableName
+                        }
+                    ],
+                    "body": {
+                        "type": "expr",
+                        "vars": [
+                            {
+                                "type": "var",
+                                "name": thirdVariableName
+                            },
+                            {
+                                "type": "var",
+                                "name": forthVariableName
+                            }
+                        ],
+                        "body": {
                             "type": "app",
                             "first": {
                                 "type": "app",
                                 "first": {
                                     "type": "var",
-                                    "name": secondVariableName
+                                    "name": firstVariableName
                                 },
                                 "second": {
                                     "type": "var",
-                                    "name": thirdVariableName
+                                    "name": forthVariableName
                                 }
                             },
                             "second": {
                                 "type": "var",
-                                "name": forthVariableName
+                                "name": thirdVariableName
                             }
                         }
                     }
-                }
-            };
+                };
+            }
+            case 'IF':
+            {
+                // \x1,x2,x3.((x1 x2) x3)
+                var firstVariableName = freshVariableNamesProvider.next().value;
+                var secondVariableName = freshVariableNamesProvider.next().value;
+                var thirdVariableName = freshVariableNamesProvider.next().value;
+                return {
+                    "type": "expr",
+                    "vars": [
+                        {
+                            "type": "var",
+                            "name": firstVariableName
+                        },
+                        {
+                            "type": "var",
+                            "name": secondVariableName
+                        },
+                        {
+                            "type": "var",
+                            "name": thirdVariableName
+                        }
+                    ],
+                    "body": {
+                        "type": "app",
+                        "first": {
+                            "type": "app",
+                            "first": {
+                                "type": "var",
+                                "name": firstVariableName
+                            },
+                            "second": {
+                                "type": "var",
+                                "name": secondVariableName
+                            }
+                        },
+                        "second": {
+                            "type": "var",
+                            "name": thirdVariableName
+                        }
+                    }
+                };
+            }
+            case 'ISZERO':
+            {
+                // \x1.((x1 \x2.F) T)
+                var firstVariableName = freshVariableNamesProvider.next().value;
+                var secondVariableName = freshVariableNamesProvider.next().value;
+                return {
+                    "type": "expr",
+                    "vars": [
+                        {
+                            "type": "var",
+                            "name": firstVariableName
+                        }
+                    ],
+                    "body": {
+                        "type": "app",
+                        "first": {
+                            "type": "app",
+                            "first": {
+                                "type": "var",
+                                "name": firstVariableName
+                            },
+                            "second": {
+                                "type": "expr",
+                                "vars": [
+                                    {
+                                        "type": "var",
+                                        "name": secondVariableName
+                                    }
+                                ],
+                                "body": {
+                                    "type": "wellKnownTerm",
+                                    "name": "FALSE",
+                                    "subtype": "string"
+                                }
+                            }
+                        },
+                        "second": {
+                            "type": "wellKnownTerm",
+                            "name": "TRUE",
+                            "subtype": "string"
+                        }
+                    }
+                };
+            }
         }
 
     } else if (wellKnownTerm.subType === 'number') {
