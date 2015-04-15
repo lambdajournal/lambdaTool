@@ -8,11 +8,26 @@ var applyCallByName = (lambdaTerm) => {
     var stepClone = lambdaTerm;
     var makingProgress;
     do {
-        steps.push(stepClone);
+        steps.push(factorizeWellKnownTerms(stepClone));
         stepClone = deepCopyLambdaTerm(stepClone);
         makingProgress = applyCallByNameStep(stepClone);
     } while (makingProgress);
     return steps;
+};
+
+var factorizeWellKnownTerms = (step) => {
+//  var lambdaTerm = deepCopyLambdaTerm(step);
+  var lambdaTermStr = lambdaTermToString(step);
+  var wellKnownTermMapping = {
+    "TRUE": /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.(\1)/g,
+    "FALSE": /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.(\2)/g,
+    "IF": /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\((\1) (\2)\) (\3)\)/g,
+    "NOT": /\\([a-z][a-z0-9]+)\.\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\((\1 \3)\) (\2)\)/
+  };
+  for(let key in wellKnownTermMapping) {
+    lambdaTermStr = lambdaTermStr.replace(wellKnownTermMapping[key], key);
+  }
+  return lambdaParser.parse(lambdaTermStr);
 };
 
 // Applies outermost-leftmost resolution
@@ -75,6 +90,9 @@ var lambdaTermToString = (lambaTerm) => {
     var visit = function (node) {
         var nodeContent;
         switch (node.type) {
+        case "wellKnownTerm":
+            nodeContent = node.name;
+            break;
         case "var":
             nodeContent = node.name;
             break;

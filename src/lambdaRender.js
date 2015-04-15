@@ -65,6 +65,9 @@ var visit = function (node, formatterProviderInstance, level) {
   var nodeContent;
   
   switch(node.type) {
+      case "wellKnownTerm":
+          nodeContent = node.name;
+          break;
       case "var" :
           nodeContent = node.name;
           break;
