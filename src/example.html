@@ -1,37 +1,21 @@
 <html>
 <head>
-    <script src="../node_modules/grunt-babel/node_modules/babel-core/browser-polyfill.js"></script>
-    <script src="lambdaParser.js"></script>
-    <script src="lambdaRender.js"></script>
-    <script src="../build/lambdaSolver.js"></script>
+  <script src="../node_modules/grunt-babel/node_modules/babel-core/browser-polyfill.js"></script>
+  <script src="./lambdaParser.js"></script>
+  <script src="./lambdaRender.js"></script>
+  <script src="../build/lambdaSolver.js"></script>
+  <script src="../build/lambdaWellKnownTerms.js"></script>
+  <script src="../build/lambdaFreshVariableNamesProvider.js"></script>
+  <script src="../build/lambdaUtils.js"></script>
+  <script src="../build/example.js"></script>
 </head>
 <body>
-<input id="lambdaTerm" size="100" type="text" value="\x.((x x) ((x (x x)) (\x.(x x))))"/>
-<button onClick="render()">Render</button>
-<div id="outputRender"></div>
+  <input id="lambdaTerm" size="100" type="text" value="\x.((x x) ((x (x x)) (\x.(x x))))"/>
+  <button id="lambdaTermBtn" onclick="render()">Render</button>
+  <div id="outputRender"></div>
 
-<input id="lambdaTerm2" size="100" type="text" value="(((\x,y.\x1,x2.((x x1) ((y x1) x2))) (\x1,x2.(x1 (x1 (x1 x2))))) (\x1,x2.(x1 x2)))" />
-<button onClick="callByName()">Call by name</button>
-<div id="outputCallByName"></div>
-
+  <input id="lambdaTerm2" size="100" type="text" value="((SUM 1) 1)" />
+  <button id="lambdaTerm2Btn" onclick="callByName()">Call by name</button>
+  <div id="outputCallByName"></div>
 </body>
-<script>
-    function render() {
-        var input = lambdaParser.parse(document.getElementById("lambdaTerm").value);
-        document.getElementById("outputRender").innerHTML = lambdaRender(input);
-    }
-
-    function callByName() {
-        var input = lambdaParser.parse(document.getElementById("lambdaTerm2").value);
-        var freshVariableProvider = freshVariableNamesProvider(input);
-        input = replaceWellKnownTerms(input, freshVariableProvider);
-        var steps = applyCallByName(input);
-        var stepsHTML = "<ul>";
-        for (var step of steps) {
-            stepsHTML += "<li>" + lambdaRender(step) + "</li>";
-        }
-        stepsHTML += "</ul>";
-        document.getElementById("outputCallByName").innerHTML = stepsHTML;
-    }
-</script>
 </html>
