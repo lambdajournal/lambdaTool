@@ -1,7 +1,7 @@
-start 
+start
 = term
 
-term 
+term
 = openBracket innerTerm:term closeBracket { return innerTerm }
 / simpleTerm
 
@@ -15,6 +15,7 @@ wellKnownTerm
 = chars: ("TRUE"
 / "FALSE"
 / "SUM"
+/ "SUCC"
 / "IF"
 / "AND"
 / "OR"
