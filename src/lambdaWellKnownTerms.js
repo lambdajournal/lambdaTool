@@ -496,8 +496,8 @@ const factorizeWellKnownTerms = (lambdaTerm) => {
     { name: "NOT", expr: /\\([a-z][a-z0-9]+)\.\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\((\1 \3)\) (\2)\)/g },
     // IF: \x1,x2,x3.((x1 x2) x3)
     { name: "IF", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\((\1) (\2)\) (\3)\)/g },
-    // ISZERO: \x1.((x1 \x2.F) T)
-    { name: "ISZERO", expr: /\\([a-z][a-z0-9]+)\.\(\(\1 \\([a-z][a-z0-9]+)\.FALSE\) TRUE\)/g}
+    // ISZERO: \x1.((x1 \x2.F) T) => \x1.((x1 \x2,x3,x4.x4) T)
+    { name: "ISZERO", expr: /\\([a-z][a-z0-9]+)\.\(\(\1 \\([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\4\) TRUE\)/g}
   ];
   for(let mapping of mappings) {
     lambdaTermStr = lambdaTermStr.replace(mapping.expr, mapping.name);
