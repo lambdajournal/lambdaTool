@@ -16,10 +16,11 @@ wellKnownTerm
 / "FALSE"
 / "SUM"
 / "SUCC"
-/ "IF"
 / "AND"
 / "OR"
 / "NOT"
+/ "IF"
+/ "ISZERO"
 / "" [0-9]+) { return { type: "wellKnownTerm", name: chars.toString().replace(/,/g,""), subType: typeof(chars) === 'string' ? 'string' : 'number'}}
 
 variable

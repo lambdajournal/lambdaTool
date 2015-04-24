@@ -389,7 +389,7 @@ const resolveWellKnownTerms = (wellKnownTerm, freshVariableNamesProvider) => {
                 // \x1.((x1 \x2.F) T)
                 var firstVariableName = freshVariableNamesProvider.next().value;
                 var secondVariableName = freshVariableNamesProvider.next().value;
-                return {
+                return replaceWellKnownTerms({
                     "type": "expr",
                     "vars": [
                         {
@@ -416,17 +416,17 @@ const resolveWellKnownTerms = (wellKnownTerm, freshVariableNamesProvider) => {
                                 "body": {
                                     "type": "wellKnownTerm",
                                     "name": "FALSE",
-                                    "subtype": "string"
+                                    "subType": "string"
                                 }
                             }
                         },
                         "second": {
                             "type": "wellKnownTerm",
                             "name": "TRUE",
-                            "subtype": "string"
+                            "subType": "string"
                         }
                     }
-                };
+                }, freshVariableNamesProvider);
             }
         }
 
@@ -463,23 +463,44 @@ const resolveWellKnownTerms = (wellKnownTerm, freshVariableNamesProvider) => {
             body: resultBody
         };
     } else {
-        throw new Error('This type of wellKnownTerm is not supported');
+        throw new Error('This type of wellKnownTerm is not supported: ' + wellKnownTerm.subType);
     }
 
 };
 
-const factorizeWellKnownTerms = (step) => {
-  let lambdaTermStr = lambdaTermToString(coalescifyLambdaTerms(step));
-  const wellKnownTermMapping = {
-    "TRUE": /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.(\1)/g,
-    "FALSE": /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.(\2)/g,
-    "SUM": /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\(\1 \3\) \(\(\2 \3\) \4\)\)/g,
-    "SUCC": /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\2 \(\(\1 \2\) \3\)\)/g,
-    "NOT": /\\([a-z][a-z0-9]+)\.\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\((\1 \3)\) (\2)\)/g,
-    "IF": /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\((\1) (\2)\) (\3)\)/g
-  };
-  for(let key in wellKnownTermMapping) {
-    lambdaTermStr = lambdaTermStr.replace(wellKnownTermMapping[key], key);
+const factorizeWellKnownTerms = (lambdaTerm) => {
+  let lambdaTermStr = lambdaTermToString(coalescifyLambdaTerms(lambdaTerm));
+  // These mappings are exhaustive only after coalescing
+  const mappings = [
+    // TRUE: \x1,x2.x1
+    { name: "TRUE", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.(\1)/g },
+    // FALSE: \x1,x2.x2
+    { name: "FALSE", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.(\2)/g },
+    // SUM: \x1,x2,x3,x4.((x1 x3) ((x2 x3) x4))
+    { name: "SUM", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\(\1 \3\) \(\(\2 \3\) \4\)\)/g },
+    // SUCC: \x1,x2,x3.(x2 ((x1 x2) x3))
+    { name: "SUCC", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\2 \(\(\1 \2\) \3\)\)/g },
+    // First AND version: \x1,x2.((x1 x2) x1)
+    { name: "AND", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\(\1 \2\) \1\)/g },
+    // Second AND version: \x1,x2.((x1 x2) FALSE), where FALSE has already been factorized
+    { name: "AND", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\(\1 \2\) FALSE\)/g },
+    // Third AND version: \x1,x2,x3,x4.((x1 (x2 (x3 x4))) x4)
+    { name: "AND", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\(\1 \(\2 \(\3 \4\)\)\) \4\)/g },
+    // First OR version: \x1,x2.((x1 x1) x2)
+    { name: "OR", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\(\1 \1\) \2\)/g },
+    // Second OR version: \x1,x2.((x1 TRUE) x2), where TRUE has already been factorized
+    { name: "OR", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\(\1 TRUE\) \2\)/g },
+    // Third OR version: \x1,x2,x3,x4.((x1 x3) ((x2 x3) x4)
+    { name: "OR", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\(\1 \3\) \(\(\2 \3\) \4\)/g },
+    // NOT: \x1,x2,x3.((x1 x3) x2)
+    { name: "NOT", expr: /\\([a-z][a-z0-9]+)\.\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\((\1 \3)\) (\2)\)/g },
+    // IF: \x1,x2,x3.((x1 x2) x3)
+    { name: "IF", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\((\1) (\2)\) (\3)\)/g },
+    // ISZERO: \x1.((x1 \x2.F) T)
+    { name: "ISZERO", expr: /\\([a-z][a-z0-9]+)\.\(\(\1 \\([a-z][a-z0-9]+)\.FALSE\) TRUE\)/g}
+  ];
+  for(let mapping of mappings) {
+    lambdaTermStr = lambdaTermStr.replace(mapping.expr, mapping.name);
   }
   return lambdaParser.parse(lambdaTermStr);
 };
