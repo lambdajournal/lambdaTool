@@ -507,7 +507,7 @@ const factorizeWellKnownTerms = (lambdaTerm) => {
   lambdaTermStr = lambdaTermStr.replace(numberRegex, (fullMatch, var1, var2, var1chain, closeBracketChain) => {
     const numberOfOpenBracket = var1chain.split("(").length - 1;
     if (numberOfOpenBracket <= closeBracketChain.length)
-      return closeBracketChain.length + ")".repeat(closeBracketChain.length - numberOfOpenBracket);
+      return numberOfOpenBracket + ")".repeat(closeBracketChain.length - numberOfOpenBracket);
     return fullMatch;
   });
   return lambdaParser.parse(lambdaTermStr);
