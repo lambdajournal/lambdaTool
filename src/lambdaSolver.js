@@ -9,25 +9,26 @@ const applyCallByName = (lambdaTerm, maxSteps) => {
     let stepClone = lambdaTerm;
     let makingProgress;
     let step = 0;
+    const freshVariableProvider = freshVariableNamesProvider(lambdaTerm);
     do {
         steps.push(stepClone);
         stepClone = deepCopyLambdaTerm(stepClone);
-        makingProgress = applyCallByNameStep(stepClone);
+        makingProgress = applyCallByNameStep(stepClone, freshVariableProvider);
         if (step++ >= maxSteps) break;
     } while (makingProgress);
     return steps;
 };
 
 // Applies outermost-leftmost resolution
-const applyCallByNameStep = (lambdaTerm) => {
+const applyCallByNameStep = (lambdaTerm, freshVariableProvider) => {
     switch (lambdaTerm.type) {
     case "var":
         return false;
     case "expr":
-        return applyCallByNameStep(lambdaTerm.body);
+        return applyCallByNameStep(lambdaTerm.body, freshVariableProvider);
     case "app":
         if (lambdaTerm.first.type === "expr") {
-            var solvedLambdaTerm = applySafeBetaReduction(lambdaTerm);
+            var solvedLambdaTerm = applySafeBetaReduction(lambdaTerm, freshVariableProvider);
             for (let lambdaTermProperty in lambdaTerm) {
                 if (lambdaTerm.hasOwnProperty(lambdaTermProperty)) {
                     delete lambdaTerm[lambdaTermProperty];
@@ -40,8 +41,8 @@ const applyCallByNameStep = (lambdaTerm) => {
             }
             return true;
         }
-        if (!applyCallByNameStep(lambdaTerm.first)) {
-            return applyCallByNameStep(lambdaTerm.second);
+        if (!applyCallByNameStep(lambdaTerm.first, freshVariableProvider)) {
+            return applyCallByNameStep(lambdaTerm.second, freshVariableProvider);
         }
         return true;
     }
@@ -134,11 +135,11 @@ const applyBetaReduction = (lambdaApplication) => {
     }
 };
 
-const applySafeBetaReduction = (lambdaApplication) => {
+const applySafeBetaReduction = (lambdaApplication, freshVariableProvider) => {
     var {
         firstTerm,
         secondTerm
-    } = disambiguateVariablesInLambdaTerms(lambdaApplication.first, lambdaApplication.second);
+    } = disambiguateVariablesInLambdaTerms(lambdaApplication.first, lambdaApplication.second, freshVariableProvider);
 
     return applyBetaReduction({
         type: "app",
@@ -147,7 +148,7 @@ const applySafeBetaReduction = (lambdaApplication) => {
     });
 };
 
-const disambiguateVariablesInLambdaTerms = (firstTerm, secondTerm) => {
+const disambiguateVariablesInLambdaTerms = (firstTerm, secondTerm, freshVariableProvider) => {
     const varsFirstTerm = findBoundAndFreeVariables(firstTerm);
     const varsSecondTerm = findBoundAndFreeVariables(secondTerm);
 
@@ -172,14 +173,16 @@ const disambiguateVariablesInLambdaTerms = (firstTerm, secondTerm) => {
 
     let replacingRulesSecondTerm = {};
     for (let varToBeRenamedInSecondTerm of varsToBeRenamedInSecondTerm) {
-        const newName = generateFreshName(allVars, varToBeRenamedInSecondTerm);
-        replacingRulesSecondTerm[varToBeRenamedInSecondTerm] = newName;
+//        const newName = generateFreshName(allVars, varToBeRenamedInSecondTerm);
+        const newNameSecondTerm = freshVariableProvider.next().value;
+        replacingRulesSecondTerm[varToBeRenamedInSecondTerm] = newNameSecondTerm;
     }
 
     let replacingRulesFirstTerm = {};
     for (let varToBeRenamedInFirstTerm of varsToBeRenamedInFirstTerm) {
-        const newName = generateFreshName(allVars, varToBeRenamedInFirstTerm);
-        replacingRulesFirstTerm[varToBeRenamedInFirstTerm] = newName;
+//        const newName = generateFreshName(allVars, varToBeRenamedInFirstTerm);
+        const newNameFirstTerm = freshVariableProvider.next().value;
+        replacingRulesFirstTerm[varToBeRenamedInFirstTerm] = newNameFirstTerm;
     }
 
     return {
