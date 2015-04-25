@@ -3,14 +3,17 @@
  * Created by Antonio, Andrea on 22/03/2015.
  */
 
-const applyCallByName = (lambdaTerm) => {
+const applyCallByName = (lambdaTerm, maxSteps) => {
+    maxSteps = maxSteps | 100;
     let steps = [];
     let stepClone = lambdaTerm;
     let makingProgress;
+    let step = 0;
     do {
         steps.push(stepClone);
         stepClone = deepCopyLambdaTerm(stepClone);
         makingProgress = applyCallByNameStep(stepClone);
+        if (step++ >= maxSteps) break;
     } while (makingProgress);
     return steps;
 };

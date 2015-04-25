@@ -12,7 +12,7 @@ simpleTerm
 / application
 
 wellKnownTerm
-= chars: ("TRUE"
+= chars: ( "TRUE"
 / "FALSE"
 / "SUM"
 / "SUCC"
@@ -21,6 +21,8 @@ wellKnownTerm
 / "NOT"
 / "IF"
 / "ISZERO"
+/ "I"
+/ "Y"
 / "" [0-9]+) { return { type: "wellKnownTerm", name: chars.toString().replace(/,/g,""), subType: typeof(chars) === 'string' ? 'string' : 'number'}}
 
 variable
