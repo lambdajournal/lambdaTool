@@ -30,6 +30,23 @@ const replaceWellKnownTerms = (lambdaTerm, freshVariableNamesProvider) => {
 const resolveWellKnownTerms = (wellKnownTerm, freshVariableNamesProvider) => {
     if (wellKnownTerm.subType === 'string') {
         switch (wellKnownTerm.name) {
+            case 'I':
+            {
+                const firstVariableName = freshVariableNamesProvider.next().value;
+                return {
+                    "type": "expr",
+                    "vars": [
+                        {
+                            "type": "var",
+                            "name": firstVariableName
+                        }
+                    ],
+                    "body": {
+                        "type": "var",
+                        "name": firstVariableName
+                    }
+                };
+            }
             case 'TRUE':
             {
                 const firstVariableName = freshVariableNamesProvider.next().value;
@@ -428,6 +445,46 @@ const resolveWellKnownTerms = (wellKnownTerm, freshVariableNamesProvider) => {
                     }
                 }, freshVariableNamesProvider);
             }
+            case 'Y':
+            {
+              // \x1.(\x2.(x1 (x2 x2)) \x3.(x1 (x3 x3)))
+              var firstVariableName = freshVariableNamesProvider.next().value;
+              var secondVariableName = freshVariableNamesProvider.next().value;
+              var thirdVariableName = freshVariableNamesProvider.next().value;
+                return {
+                    type: "expr",
+                    vars: [ { type: "var", name: firstVariableName } ],
+                    body: {
+                        type: "app",
+                        first: {
+                            type: "expr",
+                            vars: [ { type: "var", name: secondVariableName } ],
+                            body: {
+                                type: "app",
+                                first: { type: "var", name: firstVariableName },
+                                second: {
+                                    type: "app",
+                                    first: { type: "var", name: secondVariableName },
+                                    second: { type: "var", name: secondVariableName }
+                                }
+                            }
+                        },
+                        second: {
+                            type: "expr",
+                            vars: [ { type: "var", name: thirdVariableName } ],
+                            body: {
+                                type: "app",
+                                first: { type: "var", name: firstVariableName },
+                                second: {
+                                    type: "app",
+                                    first: { type: "var", name: thirdVariableName },
+                                    second: { type: "var", name: thirdVariableName }
+                                }
+                            }
+                        }
+                    }
+                };
+            }
         }
 
     } else if (wellKnownTerm.subType === 'number') {
@@ -472,10 +529,12 @@ const factorizeWellKnownTerms = (lambdaTerm) => {
   let lambdaTermStr = lambdaTermToString(coalescifyLambdaTerms(lambdaTerm));
   // These mappings are exhaustive only after coalescing
   const mappings = [
+    // I: \x1.x1
+    { name: "I", expr: /\\([a-z][a-z0-9]+)\.\1/g},
     // TRUE: \x1,x2.x1
-    { name: "TRUE", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.(\1)/g },
+    { name: "TRUE", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\1/g },
     // FALSE: \x1,x2.x2
-    { name: "FALSE", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.(\2)/g },
+    { name: "FALSE", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\2/g },
     // SUM: \x1,x2,x3,x4.((x1 x3) ((x2 x3) x4))
     { name: "SUM", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\(\1 \3\) \(\(\2 \3\) \4\)\)/g },
     // SUCC: \x1,x2,x3.(x2 ((x1 x2) x3))
@@ -497,7 +556,9 @@ const factorizeWellKnownTerms = (lambdaTerm) => {
     // IF: \x1,x2,x3.((x1 x2) x3)
     { name: "IF", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\((\1) (\2)\) (\3)\)/g },
     // ISZERO: \x1.((x1 \x2.F) T) => \x1.((x1 \x2,x3,x4.x4) T)
-    { name: "ISZERO", expr: /\\([a-z][a-z0-9]+)\.\(\(\1 \\([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\4\) TRUE\)/g}
+    { name: "ISZERO", expr: /\\([a-z][a-z0-9]+)\.\(\(\1 \\([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\4\) TRUE\)/g},
+    // Y: \x1.(\x2.(x1 (x2 x2)) \x3.(x1 (x3 x3)))
+    { name: "Y", expr: /\\([a-z][a-z0-9]+)\.\(\\([a-z][a-z0-9]+)\.\(\1 \(\2 \2\)\) \\([a-z][a-z0-9]+)\.\(\1 \(\3 \3\)\)\)/g}
   ];
   for(let mapping of mappings) {
     lambdaTermStr = lambdaTermStr.replace(mapping.expr, mapping.name);
