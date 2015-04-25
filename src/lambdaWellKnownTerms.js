@@ -502,5 +502,13 @@ const factorizeWellKnownTerms = (lambdaTerm) => {
   for(let mapping of mappings) {
     lambdaTermStr = lambdaTermStr.replace(mapping.expr, mapping.name);
   }
+  // Factorize numbers: \x1,x2.(x1 (x1 (... (x1 x2)...))
+  const numberRegex = /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.((?:\(\1\s)*)\2(\)*)/g;
+  lambdaTermStr = lambdaTermStr.replace(numberRegex, (fullMatch, var1, var2, var1chain, closeBracketChain) => {
+    const numberOfOpenBracket = var1chain.split("(").length - 1;
+    if (numberOfOpenBracket <= closeBracketChain.length)
+      return closeBracketChain.length + ")".repeat(closeBracketChain.length - numberOfOpenBracket);
+    return fullMatch;
+  });
   return lambdaParser.parse(lambdaTermStr);
 };
