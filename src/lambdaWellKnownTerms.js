@@ -1,4 +1,7 @@
-const replaceWellKnownTerms = (lambdaTerm, freshVariableNamesProvider) => {
+/*jslint esnext:true */
+import {lambdaTermToString, coalescifyLambdaTerms} from "lambdaUtils";
+  
+export const replaceWellKnownTerms = (lambdaTerm, freshVariableNamesProvider) => {
     switch (lambdaTerm.type) {
     case "wellKnownTerm":
         return resolveWellKnownTerms(lambdaTerm, freshVariableNamesProvider);
@@ -525,7 +528,7 @@ const resolveWellKnownTerms = (wellKnownTerm, freshVariableNamesProvider) => {
 
 };
 
-const factorizeWellKnownTerms = (lambdaTerm) => {
+export const factorizeWellKnownTerms = (lambdaTerm) => {
   let lambdaTermStr = lambdaTermToString(coalescifyLambdaTerms(lambdaTerm));
   // These mappings are exhaustive only after coalescing
   const mappings = [

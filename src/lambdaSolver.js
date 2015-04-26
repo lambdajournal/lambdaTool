@@ -3,7 +3,10 @@
  * Created by Antonio, Andrea on 22/03/2015.
  */
 
-const applyCallByName = (lambdaTerm, maxSteps) => {
+import {findBoundAndFreeVariables, deepCopyLambdaTerm, visitLambdaTerm} from "lambdaUtils";
+import {freshVariableNamesProvider} from "lambdaFreshVariableNamesProvider";
+
+export const applyCallByName = (lambdaTerm, maxSteps) => {
     maxSteps = maxSteps | 100;
     let steps = [];
     let stepClone = lambdaTerm;

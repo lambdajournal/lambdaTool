@@ -1,9 +1,15 @@
-const render = () => {
+/* jslint esnext: true */
+import {freshVariableNamesProvider} from "lambdaFreshVariableNamesProvider";
+import {replaceWellKnownTerms, factorizeWellKnownTerms} from "lambdaWellKnownTerms";
+import {applyCallByName} from "lambdaSolver";
+
+
+export const render = () => {
     const input = lambdaParser.parse(document.getElementById("lambdaTerm").value);
     document.getElementById("outputRender").innerHTML = lambdaRender(input);
 };
 
-const callByName = () => {
+export const callByName = () => {
     let input = lambdaParser.parse(document.getElementById("lambdaTerm2").value);
     const freshVariableProvider = freshVariableNamesProvider(input);
     input = replaceWellKnownTerms(input, freshVariableProvider);

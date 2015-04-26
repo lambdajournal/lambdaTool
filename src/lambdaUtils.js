@@ -1,4 +1,6 @@
-const visitLambdaTerm = (lambdaTerm, visitFunctions) => {
+/*jslint esnext:true */
+
+export const visitLambdaTerm = (lambdaTerm, visitFunctions) => {
     switch (lambdaTerm.type) {
     case "var":
         // we are visiting a variable
@@ -23,7 +25,7 @@ const visitLambdaTerm = (lambdaTerm, visitFunctions) => {
     }
 };
 
-const findBoundAndFreeVariables = (lambdaTerm) => {
+export const findBoundAndFreeVariables = (lambdaTerm) => {
     let allVars = [];
     let boundVars = [];
     let freeVars = [];
@@ -51,7 +53,7 @@ const findBoundAndFreeVariables = (lambdaTerm) => {
     };
 };
 
-const lambdaTermToString = (lambdaTerm) => {
+export const lambdaTermToString = (lambdaTerm) => {
     const visit = function (node) {
         let nodeContent;
         switch (node.type) {
@@ -80,9 +82,9 @@ const lambdaTermToString = (lambdaTerm) => {
     return visit(lambdaTerm);
 };
 
-const deepCopyLambdaTerm = (lambdaTerm) => JSON.parse(JSON.stringify(lambdaTerm));
+export const deepCopyLambdaTerm = (lambdaTerm) => JSON.parse(JSON.stringify(lambdaTerm));
 
-const coalescifyLambdaTerms = (lambdaTerm) => {
+export const coalescifyLambdaTerms = (lambdaTerm) => {
     let result = deepCopyLambdaTerm(lambdaTerm);
     coalescifyLambdaTermsR(result);
     return result;

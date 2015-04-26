@@ -52,7 +52,7 @@ var formatterProvider = function*(initialSize, deltaSize) {
   }
 };
 
-var lambdaRender = function (lambdaTerm, initialSize, deltaSize) {
+lambdaRender = function (lambdaTerm, initialSize, deltaSize) {
   initialSize = initialSize || 50;
   deltaSize = deltaSize || 5;
   var formatterProviderInstance = formatterProvider(initialSize, deltaSize);

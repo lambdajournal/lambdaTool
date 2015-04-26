@@ -1,5 +1,7 @@
 <html>
 <head>
+  <script src="system.js"></script>
+  
   <script src="../node_modules/grunt-babel/node_modules/babel-core/browser-polyfill.js"></script>
   <script src="./lambdaParser.js"></script>
   <script src="./lambdaRender.js"></script>
@@ -8,14 +10,25 @@
   <script src="../build/lambdaFreshVariableNamesProvider.js"></script>
   <script src="../build/lambdaUtils.js"></script>
   <script src="../build/example.js"></script>
+  <script src="../build/testModules.js"></script>
 </head>
 <body>
   <input id="lambdaTerm" size="100" type="text" value="\x.((x x) ((x (x x)) (\x.(x x))))"/>
-  <button id="lambdaTermBtn" onclick="render()">Render</button>
+  <button id="lambdaTermBtn" >Render</button>
   <div id="outputRender"></div>
 
   <input id="lambdaTerm2" size="100" type="text" value="((SUM 1) 1)" />
-  <button id="lambdaTerm2Btn" onclick="callByName()">Call by name</button>
+  <button id="lambdaTerm2Btn">Call by name</button>
   <div id="outputCallByName"></div>
+  <script>
+  System.baseURL = '../build/';
+  System.transpiler = 'babel';
+  System.paths['babel'] = '../node_modules/grunt-babel/node_modules/babel-core/browser.js';
+  System.import('example').then(function (m) {
+    document.getElementById('lambdaTermBtn').onclick = m.render;
+    document.getElementById('lambdaTerm2Btn').onclick = m.callByName;
+    
+  });
+</script>
 </body>
 </html>

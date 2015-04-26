@@ -76,7 +76,9 @@ module.exports = function (grunt) {
         },
         babel: {
             options: {
-                sourceMap: true
+                sourceMap: true,
+                modules: 'system'
+//                "module-ids": ""
             },
             dist: {
                 files: [{
@@ -100,7 +102,7 @@ module.exports = function (grunt) {
 
     // Default task
     grunt.registerTask('default', ['watch']);
-    grunt.registerTask('serve', ['connect', 'watch']);
+    grunt.registerTask('serve', ['babel','connect', 'watch']);
 
     //  grunt.registerTask('peg', ['jshint', 'qunit']);
 
