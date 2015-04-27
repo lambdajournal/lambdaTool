@@ -12,18 +12,7 @@ simpleTerm
 / application
 
 wellKnownTerm
-= chars: ( "TRUE"
-/ "FALSE"
-/ "SUM"
-/ "SUCC"
-/ "AND"
-/ "OR"
-/ "NOT"
-/ "IF"
-/ "ISZERO"
-/ "I"
-/ "Y"
-/ "" [0-9]+) { return { type: "wellKnownTerm", name: chars.toString().replace(/,/g,""), subType: typeof(chars) === 'string' ? 'string' : 'number'}}
+= chars: ([A-Z]+ / [0-9]+) { return { type: "wellKnownTerm", name: chars.toString().replace(/,/g,""), subType: isNaN(chars[0]) ? 'string' : 'number'}}
 
 variable
 = first:[a-z] others:[a-z0-9]* { return { type: "var", name: first + others.join("")}; }

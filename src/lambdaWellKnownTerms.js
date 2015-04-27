@@ -1,6 +1,6 @@
 /*jslint esnext:true */
 import {lambdaTermToString, coalescifyLambdaTerms} from "lambdaUtils";
-  
+
 export const replaceWellKnownTerms = (lambdaTerm, freshVariableNamesProvider) => {
     switch (lambdaTerm.type) {
     case "wellKnownTerm":
@@ -32,7 +32,7 @@ export const replaceWellKnownTerms = (lambdaTerm, freshVariableNamesProvider) =>
 
 const resolveWellKnownTerms = (wellKnownTerm, freshVariableNamesProvider) => {
     if (wellKnownTerm.subType === 'string') {
-        switch (wellKnownTerm.name) {
+        switch (wellKnownTerm.name.toUpperCase()) {
             case 'I':
             {
                 const firstVariableName = freshVariableNamesProvider.next().value;
@@ -450,10 +450,10 @@ const resolveWellKnownTerms = (wellKnownTerm, freshVariableNamesProvider) => {
             }
             case 'Y':
             {
-              // \x1.(\x2.(x1 (x2 x2)) \x3.(x1 (x3 x3)))
-              var firstVariableName = freshVariableNamesProvider.next().value;
-              var secondVariableName = freshVariableNamesProvider.next().value;
-              var thirdVariableName = freshVariableNamesProvider.next().value;
+                // \x1.(\x2.(x1 (x2 x2)) \x3.(x1 (x3 x3)))
+                var firstVariableName = freshVariableNamesProvider.next().value;
+                var secondVariableName = freshVariableNamesProvider.next().value;
+                var thirdVariableName = freshVariableNamesProvider.next().value;
                 return {
                     type: "expr",
                     vars: [ { type: "var", name: firstVariableName } ],
@@ -484,6 +484,83 @@ const resolveWellKnownTerms = (wellKnownTerm, freshVariableNamesProvider) => {
                                     second: { type: "var", name: thirdVariableName }
                                 }
                             }
+                        }
+                    }
+                };
+            }
+            case 'MUL':
+            {
+                // \x1,x2,x3.(x1 (x2 x3))
+                var firstVariableName = freshVariableNamesProvider.next().value;
+                var secondVariableName = freshVariableNamesProvider.next().value;
+                var thirdVariableName = freshVariableNamesProvider.next().value;
+                return {
+                    type: "expr",
+                    vars: [
+                      { type: "var", name: firstVariableName },
+                      { type: "var", name: secondVariableName },
+                      { type: "var", name: thirdVariableName } ],
+                    body: {
+                        type: "app",
+                        first:  { type: "var", name: firstVariableName },
+                        second: {
+                            type: "app",
+                            first: { type: "var", name: secondVariableName },
+                            second: { type: "var", name: thirdVariableName }
+                        }
+                    }
+                };
+            }
+            case 'PRED':
+            {
+                // \x1,x2,x3.(((x1 \x4,x5.(x5 (x4 x2))) \x6.x3) \x7.x7)
+                var firstVariableName = freshVariableNamesProvider.next().value;
+                var secondVariableName = freshVariableNamesProvider.next().value;
+                var thirdVariableName = freshVariableNamesProvider.next().value;
+                var forthVariableName = freshVariableNamesProvider.next().value;
+                var fifthVariableName = freshVariableNamesProvider.next().value;
+                var sixthVariableName = freshVariableNamesProvider.next().value;
+                var seventhVariableName = freshVariableNamesProvider.next().value;
+                return {
+                    type: "expr",
+                    vars: [
+                      { type: "var", name: firstVariableName },
+                      { type: "var", name: secondVariableName },
+                      { type: "var", name: thirdVariableName } ],
+                    body: {
+                        type: "app",
+                        first:  {
+                            type: "app",
+                            first: {
+                                type: "app",
+                                first: { type: "var", name: firstVariableName },
+                                second: {
+                                    type: "expr",
+                                    vars: [
+                                        { type: "var", name: forthVariableName },
+                                        { type: "var", name: fifthVariableName },
+                                    ],
+                                    body: {
+                                        type: "app",
+                                        first: { type: "var", name: fifthVariableName },
+                                        second: {
+                                            type: "app",
+                                            first: { type: "var", name: forthVariableName },
+                                            second: { type: "var", name: secondVariableName }
+                                        }
+                                    }
+                                }
+                            },
+                            second: {
+                                type: "expr",
+                                vars: [ { type: "var", name: sixthVariableName } ],
+                                body: { type: "var", name: thirdVariableName }
+                            }
+                        },
+                        second: {
+                            type: "expr",
+                            vars: [ { type: "var", name: seventhVariableName } ],
+                            body: { type: "var", name: seventhVariableName }
                         }
                     }
                 };
@@ -561,7 +638,11 @@ export const factorizeWellKnownTerms = (lambdaTerm) => {
     // ISZERO: \x1.((x1 \x2.F) T) => \x1.((x1 \x2,x3,x4.x4) T)
     { name: "ISZERO", expr: /\\([a-z][a-z0-9]+)\.\(\(\1 \\([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\4\) TRUE\)/g},
     // Y: \x1.(\x2.(x1 (x2 x2)) \x3.(x1 (x3 x3)))
-    { name: "Y", expr: /\\([a-z][a-z0-9]+)\.\(\\([a-z][a-z0-9]+)\.\(\1 \(\2 \2\)\) \\([a-z][a-z0-9]+)\.\(\1 \(\3 \3\)\)\)/g}
+    { name: "Y", expr: /\\([a-z][a-z0-9]+)\.\(\\([a-z][a-z0-9]+)\.\(\1 \(\2 \2\)\) \\([a-z][a-z0-9]+)\.\(\1 \(\3 \3\)\)\)/g},
+    // MUL: \x1,x2,x3.(x1 (x2 x3))
+    { name: "MUL", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\1 \(\2 \3\)\)/g},
+    // PRED: \x1,x2,x3.(((x1 \x4,x5.(x5 (x4 x2))) \x6.x3) I) where I has already been factorized
+    { name: "PRED", expr: /\\([a-z][a-z0-9]+),([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\(\(\1 \\([a-z][a-z0-9]+),([a-z][a-z0-9]+)\.\(\5 \(\4 \2\)\)\) \\([a-z][a-z0-9]+)\.\3\) I\)/g}
   ];
   for(let mapping of mappings) {
     lambdaTermStr = lambdaTermStr.replace(mapping.expr, mapping.name);
