@@ -12,10 +12,10 @@ simpleTerm
 / application
 
 wellKnownTerm
-= chars: ([A-Z]+ / [0-9]+) { return { type: "wellKnownTerm", name: chars.toString().replace(/,/g,""), subType: isNaN(chars[0]) ? 'string' : 'number'}}
+= chars: ([A-Z] [A-Za-z0-9]* / [0-9]+) { return { type: "wellKnownTerm", name: chars.toString().replace(/,/g,""), subType: isNaN(chars[0]) ? 'string' : 'number'}}
 
 variable
-= first:[a-z] others:[a-z0-9]* { return { type: "var", name: first + others.join("")}; }
+= first:[a-z] others:[A-Za-z0-9]* { return { type: "var", name: first + others.join("")}; }
 
 expression
 = "\\" vars:varList "." body:term { return { type: "expr", vars: vars, body: body}; }

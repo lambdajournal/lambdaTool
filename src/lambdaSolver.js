@@ -7,7 +7,7 @@ import {findBoundAndFreeVariables, deepCopyLambdaTerm, visitLambdaTerm} from "la
 import {freshVariableNamesProvider} from "lambdaFreshVariableNamesProvider";
 
 export const applyCallByName = (lambdaTerm, maxSteps) => {
-    maxSteps = maxSteps | 100;
+    maxSteps = maxSteps | 20;
     let steps = [];
     let stepClone = lambdaTerm;
     let makingProgress;
@@ -16,19 +16,20 @@ export const applyCallByName = (lambdaTerm, maxSteps) => {
     do {
         steps.push(stepClone);
         stepClone = deepCopyLambdaTerm(stepClone);
-        makingProgress = applyCallByNameStep(stepClone, freshVariableProvider);
+        const freeVars = findBoundAndFreeVariables(stepClone).freeVars;
+        makingProgress = applyCallByNameStep(stepClone, freshVariableProvider, freeVars);
         if (step++ >= maxSteps) break;
     } while (makingProgress);
     return steps;
 };
 
 // Applies outermost-leftmost resolution
-const applyCallByNameStep = (lambdaTerm, freshVariableProvider) => {
+const applyCallByNameStep = (lambdaTerm, freshVariableProvider, freeVars) => {
     switch (lambdaTerm.type) {
     case "var":
         return false;
     case "expr":
-        return applyCallByNameStep(lambdaTerm.body, freshVariableProvider);
+        return applyCallByNameStep(lambdaTerm.body, freshVariableProvider, freeVars);
     case "app":
         if (lambdaTerm.first.type === "expr") {
             var solvedLambdaTerm = applySafeBetaReduction(lambdaTerm, freshVariableProvider);
@@ -43,9 +44,15 @@ const applyCallByNameStep = (lambdaTerm, freshVariableProvider) => {
                 }
             }
             return true;
+        } else if (lambdaTerm.first.type === "var" && freeVars.indexOf(lambdaTerm.first.name) >= 0) {
+            lambdaTerm.type = "var";
+            lambdaTerm.name = lambdaTerm.first.name;
+            delete lambdaTerm["first"];
+            delete lambdaTerm["second"];
+            return true;
         }
-        if (!applyCallByNameStep(lambdaTerm.first, freshVariableProvider)) {
-            return applyCallByNameStep(lambdaTerm.second, freshVariableProvider);
+        if (!applyCallByNameStep(lambdaTerm.first, freshVariableProvider, freeVars)) {
+            return applyCallByNameStep(lambdaTerm.second, freshVariableProvider, freeVars);
         }
         return true;
     }

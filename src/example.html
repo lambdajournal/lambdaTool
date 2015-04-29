@@ -1,7 +1,7 @@
 <html>
 <head>
   <script src="system.js"></script>
-  
+
   <script src="../node_modules/grunt-babel/node_modules/babel-core/browser-polyfill.js"></script>
   <script src="./lambdaParser.js"></script>
   <script src="./lambdaRender.js"></script>
@@ -17,7 +17,7 @@
   <button id="lambdaTermBtn" >Render</button>
   <div id="outputRender"></div>
 
-  <input id="lambdaTerm2" size="100" type="text" value="((SUM 1) 1)" />
+  <input id="lambdaTerm2" size="100" type="text" value="(Y \f,n.(((IF (ISZERO n)) 1) ((MUL n) (f (PRED n)))))" />
   <button id="lambdaTerm2Btn">Call by name</button>
   <div id="outputCallByName"></div>
   <script>
@@ -27,7 +27,7 @@
   System.import('example').then(function (m) {
     document.getElementById('lambdaTermBtn').onclick = m.render;
     document.getElementById('lambdaTerm2Btn').onclick = m.callByName;
-    
+
   });
 </script>
 </body>
