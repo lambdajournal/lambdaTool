@@ -3,7 +3,7 @@
  * Created by Antonio, Andrea on 22/03/2015.
  */
 
-import {findBoundAndFreeVariables, deepCopyLambdaTerm, visitLambdaTerm} from "lambdaUtils";
+import {findBoundAndFreeVariables, deepCopyLambdaTerm, visitLambdaTerm, lambdaTermToString} from "lambdaUtils";
 import {freshVariableNamesProvider} from "lambdaFreshVariableNamesProvider";
 
 export const applyCallByName = (lambdaTerm, maxSteps) => {
@@ -14,6 +14,7 @@ export const applyCallByName = (lambdaTerm, maxSteps) => {
     let step = 0;
     const freshVariableProvider = freshVariableNamesProvider(lambdaTerm);
     do {
+        console.log(step + ": " + lambdaTermToString(stepClone));
         steps.push(stepClone);
         stepClone = deepCopyLambdaTerm(stepClone);
         const freeVars = findBoundAndFreeVariables(stepClone).freeVars;
