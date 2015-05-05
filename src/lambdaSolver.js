@@ -52,6 +52,7 @@ const applyCallByNameStep = (lambdaTerm, freshVariableProvider, freeVars) => {
             delete lambdaTerm["second"];
             return true;
         }
+        // We first go on the first element: leftmost derivation 
         if (!applyCallByNameStep(lambdaTerm.first, freshVariableProvider, freeVars)) {
             return applyCallByNameStep(lambdaTerm.second, freshVariableProvider, freeVars);
         }
