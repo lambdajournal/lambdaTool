@@ -1,6 +1,6 @@
 /* jslint esnext: true */
-import {freshVariableNamesProvider} from "lambdaFreshVariableNamesProvider";
-import {replaceWellKnownTerms, factorizeWellKnownTerms} from "lambdaWellKnownTerms";
+import {freshVariableNamesProvider} from "./utils/lambdaFreshVariableNamesProvider";
+import {replaceWellKnownTerms, factorizeWellKnownTerms} from "./utils/lambdaWellKnownTerms";
 import {applyCallByName} from "lambdaSolver";
 
 

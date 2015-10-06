@@ -1,5 +1,5 @@
 /*jslint esnext:true */
-import {lambdaTermToString, coalescifyLambdaTerms} from "lambdaUtils";
+import {lambdaTermToString, coalescifyLambdaTerms} from "./lambdaUtils";
 
 export const replaceWellKnownTerms = (lambdaTerm, freshVariableNamesProvider) => {
     switch (lambdaTerm.type) {

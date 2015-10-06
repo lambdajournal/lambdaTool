@@ -3,8 +3,8 @@
  * Created by Antonio, Andrea on 22/03/2015.
  */
 
-import {findBoundAndFreeVariables, deepCopyLambdaTerm, visitLambdaTerm, lambdaTermToString} from "lambdaUtils";
-import {freshVariableNamesProvider} from "lambdaFreshVariableNamesProvider";
+import {findBoundAndFreeVariables, deepCopyLambdaTerm, visitLambdaTerm, lambdaTermToString} from "./utils/lambdaUtils";
+import {freshVariableNamesProvider} from "./utils/lambdaFreshVariableNamesProvider";
 
 export const applyCallByName = (lambdaTerm, maxSteps) => {
     maxSteps = maxSteps | 20;
@@ -52,7 +52,7 @@ const applyCallByNameStep = (lambdaTerm, freshVariableProvider, freeVars) => {
             delete lambdaTerm["second"];
             return true;
         }
-        // We first go on the first element: leftmost derivation 
+        // We first go on the first element: leftmost derivation
         if (!applyCallByNameStep(lambdaTerm.first, freshVariableProvider, freeVars)) {
             return applyCallByNameStep(lambdaTerm.second, freshVariableProvider, freeVars);
         }

@@ -1,5 +1,5 @@
 /* jslint esnext: true */
-import {findBoundAndFreeVariables} from "lambdaUtils";
+import {findBoundAndFreeVariables} from "./lambdaUtils";
 
 export const freshVariableNamesProvider = function* (lambdaTerm) {
     const freshVariablePrefix = "x";

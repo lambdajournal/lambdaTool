@@ -105,3 +105,56 @@ const coalescifyLambdaTermsR = (lambdaTerm) => {
         break;
     }
 }
+
+const colorProvider = function*() {
+  while (true) {
+    yield "black";
+    yield "gray";
+    yield "navy";
+    yield "blue";
+    yield "maroon";
+    yield "purple";
+    yield "fuchsia";
+    yield "red";
+    yield "orange";
+  }
+};
+
+const fontSizeProvider = function*(initialSize, deltaSize) {
+  var currentSize = initialSize;
+  while (true) {
+    yield currentSize;
+    if (currentSize - deltaSize >= 8) {
+      currentSize -= deltaSize;
+    }
+  }
+};
+
+const bracketsProvider = function*() {
+  while (true) {
+    yield { open: "{", close: "}"};
+    yield { open: "[", close: "]"};
+    yield { open: "(", close: ")"};
+  }
+};
+
+export const formatterProvider = function*(initialSize, deltaSize) {
+  var colorProviderInstance = colorProvider();
+  var fontSizeProviderInstance = fontSizeProvider(initialSize, deltaSize);
+  var bracketsProviderInstance = bracketsProvider();
+  var level = yield {};
+  var formats = [];
+  while (true) {
+    if (level < formats.length) {
+      yield formats[level];
+      level = yield {};
+      continue;
+    }
+
+    formats.push({
+      color: colorProviderInstance.next().value,
+      fontSize: fontSizeProviderInstance.next().value,
+      brackets: bracketsProviderInstance.next().value
+    });
+  }
+};
